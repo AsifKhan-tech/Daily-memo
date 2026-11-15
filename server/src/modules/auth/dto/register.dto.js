@@ -1,0 +1,18 @@
+import Joi from "joi";
+
+import Basedto from "../../../common/dto/base.dto.js";
+
+/**
+ * RegisterDto extended Basedto so,
+ * RegisterDto can use inherited static method validateInput()
+ */
+
+class RegisterDto extends Basedto {
+  static schema = Joi.object({
+    name: Joi.string().trim().min(2).max(50).required(),
+    email: Joi.string().email().trim().min(3).max(254).lowercase().required(),
+    password: Joi.string().min(8).max(128).message("Password must contain 8 chars minimum").required(),
+    role: Joi.string().valid("student", "teacher", "user").default("user"),
+  });
+}
+export default RegisterDto;

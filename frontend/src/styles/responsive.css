@@ -1,0 +1,260 @@
+/* src/css/responsive.css
+   Viewport and accessibility overrides.
+   Loaded last so these rules win. */
+
+/* ========================================
+   1. Responsive Navigation
+======================================== */
+
+/* Below ~1024px: hide inline navigation and show hamburger. */
+
+@media (max-width: 63.99rem) {
+  /* Position context for navigation dropdown. */
+  .navbar {
+    position: relative;
+  }
+
+  /* Hamburger button. */
+  .menu-toggle {
+    display: inline-flex;
+    margin-left: auto;
+  }
+
+  /* Collapsed navigation panel. */
+  .nav-links {
+    align-items: stretch;
+    background: color-mix(in srgb, var(--surface-strong) 94%, transparent);
+    border: 1px solid var(--line);
+    border-radius: 0.9rem;
+    box-shadow: 0 0.75rem 2rem var(--shadow);
+
+    display: none;
+    flex-direction: column;
+    gap: 0.2rem;
+
+    left: 0.75rem;
+    padding: 0.4rem;
+    position: absolute;
+    right: 0.75rem;
+    top: calc(100% + 0.5rem);
+
+    /* Important: allow profile dropdown to overflow. */
+    overflow: visible;
+
+    -webkit-backdrop-filter: blur(1.25rem) saturate(150%);
+    backdrop-filter: blur(1.25rem) saturate(150%);
+  }
+
+  /* Show navigation when hamburger is clicked. */
+  .navbar.is-menu-open .nav-links {
+    display: flex;
+  }
+
+  /* Larger navigation tap targets. */
+  .nav-links a {
+    min-height: 2.5rem;
+  }
+
+  /* Login/Register buttons. */
+  .nav-links .auth-actions {
+    align-self: flex-start;
+    display: flex;
+    margin: 0.35rem 0.3rem;
+    max-width: 100%;
+    min-width: 0;
+    width: auto;
+  }
+
+  /* Profile menu container. */
+  .nav-links .profile-menu {
+    position: relative;
+    width: auto;
+  }
+
+  /* Profile trigger. */
+  .nav-links .profile-trigger {
+    justify-content: flex-start;
+    min-height: 2.75rem;
+  }
+
+  /* Profile dropdown positioning. */
+  .nav-links .profile-dropdown {
+    left: 0;
+    right: auto;
+    top: calc(100% + 0.5rem);
+    width: min(16rem, calc(100vw - 3rem));
+  }
+}
+
+/* ========================================
+   2. Small Screen Navigation
+======================================== */
+
+/* Below 640px. */
+
+@media (max-width: 40rem) {
+  /* Stack authentication buttons vertically. */
+  .nav-links .auth-actions {
+    align-self: stretch;
+    flex-direction: column;
+    margin-inline: 0;
+  }
+
+  .nav-links .auth-btn {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  /* Keep profile dropdown within viewport width. */
+  .nav-links .profile-dropdown {
+    max-width: calc(100vw - 3rem);
+  }
+
+  /* Comfortable touch targets. */
+  .nav-links .profile-dropdown-links a,
+  .nav-links .profile-dropdown-links button {
+    min-height: 2.75rem;
+  }
+
+  .profile-page {
+    margin: 1rem auto;
+    padding: 0.5rem;
+  }
+
+  .profile-details {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+  }
+
+  .profile-card-header {
+    padding: 1.25rem;
+  }
+
+  .not-found-page {
+    min-height: 60vh;
+    padding: 2rem 0.75rem;
+  }
+
+  .not-found-card {
+    padding: 2rem 1.25rem;
+    border-radius: 1.15rem;
+  }
+
+  .not-found-illustration {
+    height: 10rem;
+  }
+
+  .not-found-actions {
+    flex-direction: column;
+  }
+
+  .not-found-home-button,
+  .not-found-back-button {
+    width: 100%;
+  }
+}
+
+/* ========================================
+   3. Tablet and Larger Screens
+======================================== */
+
+@media (min-width: 40rem) {
+  .app-shell {
+    padding: 2rem;
+  }
+
+  .todo-container {
+    border-radius: 1.75rem;
+    padding: 2rem;
+  }
+
+  /* Preserve registration form spacing. */
+  .todo-container.register-container {
+    padding: 1.5rem;
+  }
+
+  .contact-section {
+    border-radius: 1.75rem;
+    padding: 2rem;
+  }
+
+  .site-footer {
+    padding-inline: 2rem;
+  }
+
+  .todo-form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .add-todo {
+    width: 100%;
+  }
+}
+
+/* ========================================
+   4. Responsive Footer
+======================================== */
+
+@media (max-width: 63.99rem) {
+  .footer-content {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .footer-links {
+    flex-wrap: wrap;
+  }
+}
+
+/* ========================================
+   5. Responsive Toast Notifications
+======================================== */
+
+@media (max-width: 480px) {
+  .app-toast {
+    width: min(360px, calc(100% - 2rem));
+    min-height: 58px;
+    padding: 0.7rem 0.85rem;
+    gap: 0.65rem;
+  }
+
+  .app-toast__message {
+    font-size: 0.9rem;
+  }
+
+  .app-toast__icon,
+  .app-toast__icon svg {
+    width: 1.4rem;
+    height: 1.4rem;
+  }
+
+  .app-toast__close {
+    width: 1.8rem;
+    height: 1.8rem;
+    font-size: 1.4rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .login-password-links {
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+
+  .login-password-links a {
+    font-size: 0.8rem;
+  }
+}
+
+/* ========================================
+   6. Accessibility: Reduced Motion
+======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

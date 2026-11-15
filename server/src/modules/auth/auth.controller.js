@@ -1,0 +1,109 @@
+import * as authService from "./auth.service.js";
+import Apiresponse from "../../common/utils/api-response.js";
+import { setAuthCookies, clearAuthCookies } from "../../common/utils/cookie.utils.js";
+
+// user registration controller
+const register = async (req, res) => {
+  const user = await authService.register(req.body);
+  Apiresponse.created(res, "Registration successfull", user);
+};
+
+// Verify registered user's email controller
+const verifyEmail = async (req, res) => {
+  await authService.verifyEmail(req.params.token);
+  Apiresponse.ok(res, "email verified successfully");
+};
+
+// Re-send email to the user to verify its email controller, if it didn't get due to any reason
+const resendVerificationEmail = async (req, res) => {
+  await authService.resendVerificationEmail(req.body.email);
+  Apiresponse.ok(res, "verification email resent successfully");
+};
+
+// User login controller
+const login = async (req, res) => {
+  const { user, accessToken, refreshToken } = await authService.login(req.body);
+
+  /**
+   * sending access token in cookie
+   * frontend cann't read the cookie because 'httpOnly: true'
+   * It prevents the XSS(Cross-Site scripting) attack
+   *
+   * secure: process.env.NODE_ENV === "production"
+   * This cookie will only transfer on HTTPS connections in 'production environment'
+   *
+   * sameSite: "strict" => Ensures that the cookie is sent on only with requests to your own domain.
+   * It protects the server against 'CSRF (Cross-Site Request Forgery)' attacks
+   */
+
+  /* ---- Setting cookies ---- */
+
+  /**
+   * sending refresh token in cookie
+   * frontend cann't read the cookie because 'httpOnly: true'
+   * It prevents the XSS(Cross-Site scripting) attack
+   *
+   * secure: process.env.NODE_ENV === "production"
+   * This cookie will only transfer on HTTPS connections in 'production environment'
+   *
+   * sameSite: "strict" => Ensures that the cookie is sent on only with requests to your own domain.
+   * It protects the server against 'CSRF (Cross-Site Request Forgery)' attacks
+   */
+
+  // Set authentication cookies
+  setAuthCookies(res, accessToken, refreshToken);
+
+  Apiresponse.ok(res, "User login successfully", { user });
+};
+
+// Token refresh controller
+const refreshToken = async (req, res) => {
+  const token = req.cookies?.refreshToken;
+  const { user, accessToken, refreshToken: newRefreshToken } = await authService.refresh(token);
+
+  // Set authentication cookies
+  setAuthCookies(res, accessToken, newRefreshToken);
+
+  // Return user information, not tokens.
+  Apiresponse.ok(res, "Tokens refreshed successfully", { user });
+};
+
+// User logout controller
+const logout = async (req, res) => {
+  //extract user's id
+  await authService.logout(req.user.id);
+
+  // Clear authentication cookies
+  clearAuthCookies(res);
+  Apiresponse.ok(res, "Logout successfully");
+};
+
+//forgot password controller
+const forgotPassword = async (req, res) => {
+  await authService.forgotPassword(req.body.email);
+  Apiresponse.ok(res, "If an account exists with this email, you will receive a password reset link.");
+};
+
+// reset password controller
+const resetPassword = async (req, res) => {
+  await authService.resetPassword(req.params.token, req.body.password);
+  Apiresponse.ok(res, "password reset successfully");
+};
+
+// user profile controller
+const profile = async (req, res) => {
+  const user = await authService.profile(req.user.id);
+  Apiresponse.ok(res, "User profile", user);
+};
+
+export {
+  register,
+  login,
+  refreshToken,
+  logout,
+  verifyEmail,
+  forgotPassword,
+  resetPassword,
+  profile,
+  resendVerificationEmail,
+};

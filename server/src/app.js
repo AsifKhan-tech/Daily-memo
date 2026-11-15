@@ -1,0 +1,124 @@
+import express from "express";
+import cookieParser from "cookie-parser";
+import cors from "cors";
+// import path from "node:path";
+
+import authRoutes from "./modules/auth/auth.route.js";
+import todoRoutes from "./modules/todo/todo.route.js";
+import contactRoutes from "./modules/contact/contact.route.js";
+
+import ApiError from "./common/utils/api-error.js";
+// import { fileURLToPath } from "node:url";
+
+const app = express();
+
+// const frontendPath = path.join(path.dirname(fileURLToPath(import.meta.url)), "../../frontend/dist");
+// app.use(express.static(frontendPath));
+
+// Adding middleware to parse JSON (req.body) data
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+/**
+ * It will parse client's cookies and wrap them in 'req.cookies'
+ * when a client do request, the browser automatically send cookies with the request
+ */
+app.use(cookieParser());
+
+// app.get("/api/v1/auth/test", (req, res) => {
+//   res.sendFile(path.join(frontendPath, "index.html"));
+// });
+
+/**
+ * CORS = Cross-Origin Resource Sharing
+ *
+ * Browsers block a website from calling an API on another origin
+ * (different protocol, domain, or port) unless the API allows it.
+ *
+ * Production rule: never use origin: "*".
+ * Allow only your real frontend URLs. That is required when
+ * credentials: true (cookies / auth headers).
+ *
+ * CLIENT_URL can be one URL or several, separated by commas:
+ *   CLIENT_URL=https://dailymemo.com,https://www.dailymemo.com
+ */
+const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
+  .split(",")
+  .map((url) => url.trim())
+  .filter(Boolean);
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      // Tools like Postman / curl send no Origin header — allow those.
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error(`CORS blocked origin: ${origin}`));
+    },
+    credentials: true, // allow cookies (accessToken / refreshToken)
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  }),
+);
+
+/**
+ * Mount routes into app
+ * Signaling to the express: "when any request start with '/api/v1/auth' ,
+ * send/route it to the 'authRoutes', `todoRoutes`, `contactRoutes`, router."
+ */
+app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/todos", todoRoutes);
+app.use("/api/v1/contact", contactRoutes);
+
+/**
+ * Global Catch-All (404 Fallback) Route.
+ *
+ * Intercepts all unmatched HTTP requests (GET, POST, PUT, etc.) for any undefined endpoint.
+ * Throws a 404 Not Found error, which is then automatically forwarded to the global error-handling middleware for a consistent JSON response.
+ */
+
+/**
+ * Health Check Route
+ * This route is used to check if the server is running & healthy(for loadbalancer and Docker compose).
+ */
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Server is healthy and running",
+    uptime: process.uptime(), // server up time
+    timestamp: new Date().toISOString(),
+  });
+});
+
+app.all("{*path}", (req, res) => {
+  throw ApiError.notFound(`Route ${req.originalUrl} not found`);
+});
+
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error({
+    name: err.name,
+    message: err.message,
+    stack: err.stack,
+    path: req.originalUrl,
+    method: req.method,
+  });
+
+  if (res.headersSent) {
+    return next(err);
+  }
+
+  res.status(err.statusCode || 500).json({
+    success: false,
+    code: err.code || "INTERNAL_SERVER_ERROR",
+    message: process.env.NODE_ENV === "production" ? "Something went wrong" : err.message,
+  });
+});
+
+export default app;

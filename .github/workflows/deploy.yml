@@ -37,8 +37,14 @@ jobs:
           username: ubuntu
           key: ${{ secrets.PRIVATE_KEY }}
           script: |
+            # log in docker hub from VPS
+            echo "${{ secrets.DOCKERHUB_TOKEN }}" | sudo docker login -u "${{ vars.DOCKERHUB_USERNAME }}" --password-stdin
+
+            # Stop the existing docker container
+            sudo docker stop daily-memo-backend || true
+
             # Kill the existing docker container
-            sudo docker rm -r daily-memo-backend || true
+            sudo docker rm daily-memo-backend || true
 
             # Again pull the fresh docker image from Docker Hub
             sudo docker pull asifdotcom/daily-memo:backend

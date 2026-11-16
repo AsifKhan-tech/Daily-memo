@@ -96,6 +96,10 @@ app.get("/health", (req, res) => {
   });
 });
 
+app.get("/image", (req, res) => {
+  res.send("I have manually pull the container once on VPS");
+});
+
 app.all("{*path}", (req, res) => {
   throw ApiError.notFound(`Route ${req.originalUrl} not found`);
 });

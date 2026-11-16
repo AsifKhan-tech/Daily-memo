@@ -50,7 +50,7 @@ jobs:
             sudo docker pull asifdotcom/daily-memo:backend
 
             # Run docker -d -p 4000:4000 asifdotcom/daily-memo:backend
-            sudo docker run --env-file ./server/.env -d --name daily-memo-backend --restart unless-stopped -p 4000:4000 asifdotcom/daily-memo:backend
+            sudo docker run --env-file /home/ubuntu/server/.env -d --name daily-memo-backend --restart unless-stopped -p 4000:4000 asifdotcom/daily-memo:backend
 
             # clean up old/un-used images
             sudo docker image prune -f

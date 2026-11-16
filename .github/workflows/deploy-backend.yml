@@ -1,56 +1,47 @@
-name: Deploy Daily Memo Application
-
+name: Deploy Backend
 on:
   push:
     branches:
       - main
+    paths:
+      - "server/**" # It will run when anything change in backend
+      - ".github/workflows/deploy-backend.yml"
 
 jobs:
-  deploy:
+  deploy-backend:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code # Checkout the local machine
-        uses: actions/checkout@v5 # on to GitHub's machine
+      - name: Checkout code
+        uses: actions/checkout@v5
 
-      - name: Login to Docker Hub # Login to
+      - name: Login to Docker Hub
         uses: docker/login-action@v4
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }} # Docker
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v4
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
-      - name: Build and push
+      - name: Build and push Backend
         run: |
           docker build -t asifdotcom/daily-memo:backend ./server 
           docker push asifdotcom/daily-memo:backend
 
-      - name: Deploy on ExCloud
+      - name: Deploy Backend on ExCloud
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{secrets.SERVER_HOST}}
           username: ubuntu
           key: ${{ secrets.PRIVATE_KEY }}
           script: |
-            # Authenticate VPS with Docker Hub securely
             echo "${{ secrets.DOCKERHUB_TOKEN }}" | sudo docker login -u "${{ vars.DOCKERHUB_USERNAME }}" --password-stdin
+            sudo docker network create memo-network || true
 
-            # Stop the existing docker container
+            # Sirf Backend container ko stop/update/run karega
             sudo docker stop daily-memo-backend || true
-
-            # Kill the existing docker container
             sudo docker rm daily-memo-backend || true
-
-            # Again pull the fresh docker image from Docker Hub
             sudo docker pull asifdotcom/daily-memo:backend
+            sudo docker run --network memo-network --network-alias api --env-file /home/ubuntu/server/.env -d --name daily-memo-backend --restart unless-stopped -p 4000:4000 asifdotcom/daily-memo:backend
 
-            # Run docker -d -p 4000:4000 asifdotcom/daily-memo:backend
-            sudo docker run --env-file /home/ubuntu/server/.env -d --name daily-memo-backend --restart unless-stopped -p 4000:4000 asifdotcom/daily-memo:backend
-
-            # clean up old/un-used images
             sudo docker image prune -f

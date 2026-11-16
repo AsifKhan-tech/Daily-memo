@@ -1,0 +1,46 @@
+name: Deploy Frontend
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "frontend/**" # It will run when anything change in frontend
+      - ".github/workflows/deploy-frontend.yml"
+
+jobs:
+  deploy-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build and push Frontend
+        run: |
+          docker build -t asifdotcom/daily-memo:frontend --build-arg VITE_API_BASE_URL=/api/v1 ./frontend
+          docker push asifdotcom/daily-memo:frontend
+
+      - name: Deploy Frontend on ExCloud
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{secrets.SERVER_HOST}}
+          username: ubuntu
+          key: ${{ secrets.PRIVATE_KEY }}
+          script: |
+            echo "${{ secrets.DOCKERHUB_TOKEN }}" | sudo docker login -u "${{ vars.DOCKERHUB_USERNAME }}" --password-stdin
+            sudo docker network create memo-network || true
+
+            sudo docker stop daily-memo-frontend || true
+            sudo docker rm daily-memo-frontend || true
+            sudo docker pull asifdotcom/daily-memo:frontend
+            sudo docker run --network memo-network -d --name daily-memo-frontend --restart unless-stopped -p 80:80 asifdotcom/daily-memo:frontend
+
+            sudo docker image prune -f

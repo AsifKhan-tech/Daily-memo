@@ -37,7 +37,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.PRIVATE_KEY }}
           script: |
-            # log in docker hub from VPS
+            # Authenticate VPS with Docker Hub securely
             echo "${{ secrets.DOCKERHUB_TOKEN }}" | sudo docker login -u "${{ vars.DOCKERHUB_USERNAME }}" --password-stdin
 
             # Stop the existing docker container

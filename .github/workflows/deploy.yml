@@ -27,24 +27,24 @@ jobs:
 
       - name: Build and push
         run: |
-          docker build -t asifdotcom/daily-memo:backend .
+          docker build -t asifdotcom/daily-memo:backend ./server 
           docker push asifdotcom/daily-memo:backend
 
       - name: Deploy on ExCloud
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: 45.74.156.45
+          host: ${{secrets.SERVER_HOST}}
           username: ubuntu
           key: ${{ secrets.PRIVATE_KEY }}
           script: |
             # Kill the existing docker container
-            sudo docker rm -rf daily-memo:backend || true
+            sudo docker rm -r daily-memo-backend || true
 
             # Again pull the fresh docker image from Docker Hub
             sudo docker pull asifdotcom/daily-memo:backend
 
             # Run docker -d -p 4000:4000 asifdotcom/daily-memo:backend
-            sudo docker run env_file ./server/.env -d --name daily-memo:backend --restart unless stopped -p 4000:4000 asifdotcom/daily-memo:backend
+            sudo docker run --env-file ./server/.env -d --name daily-memo-backend --restart unless-stopped -p 4000:4000 asifdotcom/daily-memo:backend
 
             # clean up old/un-used images
             sudo docker image prune -f

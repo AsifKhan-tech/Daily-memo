@@ -2,16 +2,11 @@
   "name": "server",
   "version": "1.0.0",
   "private": "true",
-  "description": "",
+  "description": "Daily Memo is a full-stack task and memo app. Securely create your account and manage your tasks",
   "main": "server.js",
   "scripts": {
     "dev": "node --watch server.js",
-    "start": "node server.js",
-    "docker:up": "docker compose up -d",
-    "docker:down": "docker compose down -v",
-    "docker:start": "docker compose start",
-    "docker:stop": "docker compose stop",
-    "docker:restart": "docker compose restart"
+    "start": "node server.js"
   },
   "keywords": [
     "Node.js",

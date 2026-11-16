@@ -10,10 +10,41 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Checkout code # Checkout the local machine
+        uses: actions/checkout@v5 # on to GitHub's machine
+
+      - name: Login to Docker Hub # Login to
+        uses: docker/login-action@v4
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }} # Docker
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build and push
+        run: |
+          docker build -t asifdotcom/daily-memo .
+          docker push asifdotcom/daily-memo
+
+      - name: Deploy on ExCloud
+        uses: appleboy/ssh-action@v1.0.3
         with:
-          driver-opts: network=host
+          host: 45.74.156.45
+          username: ubuntu
+          key: ${{ secrets.PRIVATE_KEY }}
+          script: |
+            # Kill the existing docker container
+            sudo docker rm -rf daily-memo || true
+
+            # Again pull the fresh docker image from Docker Hub
+            sudo docker pull asifdotcom/daily-memo
+
+            # Run docker -d -p 4000:4000 asifdotcom/daily-memo
+            sudo docker run env_file ./server/.env -d --name daily-memo --restart unless stopped -p 4000:4000 asifdotcom/daily-memo
+
+            # clean up old/un-used images
+            sudo docker image prune -f

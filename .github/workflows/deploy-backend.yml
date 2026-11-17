@@ -36,15 +36,14 @@ jobs:
           key: ${{ secrets.PRIVATE_KEY }}
           script: |
             echo "${{ secrets.DOCKERHUB_TOKEN }}" | sudo docker login -u "${{ vars.DOCKERHUB_USERNAME }}" --password-stdin
+
             sudo docker network create memo-network || true
 
             # Stop, Kill, Pull, and Run the backend container
-
-
-            # sudo docker stop daily-memo-backend || true
-            # sudo docker rm daily-memo-backend || true
+             sudo docker stop daily-memo-backend || true
+             sudo docker rm daily-memo-backend || true
 
             sudo docker pull asifdotcom/daily-memo:backend
-            sudo docker run --network memo-network --network-alias api --env-file /home/ubuntu/server/.env -d --name daily-memo-backend --restart unless-stopped 127.0.0.1:4000:4000 asifdotcom/daily-memo:backend
+            sudo docker run --network memo-network --network-alias api --env-file /home/ubuntu/server/.env -d --name daily-memo-backend --restart unless-stopped -p 127.0.0.1:4000:4000 asifdotcom/daily-memo:backend
 
-          # sudo docker image prune -f
+            sudo docker image prune -f

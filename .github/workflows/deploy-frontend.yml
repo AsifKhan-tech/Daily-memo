@@ -43,6 +43,6 @@ jobs:
             sudo docker stop daily-memo-frontend || true
             sudo docker rm daily-memo-frontend || true
             sudo docker pull asifdotcom/daily-memo:frontend
-            sudo docker run --network memo-network -d --name daily-memo-frontend --restart unless-stopped  80:80 asifdotcom/daily-memo:frontend
+            sudo docker run --network memo-network -d --name daily-memo-frontend --restart unless-stopped asifdotcom/daily-memo:frontend
 
             sudo docker image prune -f

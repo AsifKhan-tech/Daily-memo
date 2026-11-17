@@ -42,7 +42,7 @@ app.use(cookieParser());
  * CLIENT_URL can be one URL or several, separated by commas:
  *   CLIENT_URL=https://dailymemo.com,https://www.dailymemo.com
  */
-const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
+const allowedOrigins = (process.env.CLIENT_URL || "")
   .split(",")
   .map((url) => url.trim())
   .filter(Boolean);

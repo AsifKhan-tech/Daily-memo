@@ -38,7 +38,9 @@ jobs:
             echo "${{ secrets.DOCKERHUB_TOKEN }}" | sudo docker login -u "${{ vars.DOCKERHUB_USERNAME }}" --password-stdin
             sudo docker network create memo-network || true
 
-            # Sirf Backend container ko stop/update/run karega
+            # Stop, Kill, Pull, and Run the backend container
+
+
             sudo docker stop daily-memo-backend || true
             sudo docker rm daily-memo-backend || true
             sudo docker pull asifdotcom/daily-memo:backend

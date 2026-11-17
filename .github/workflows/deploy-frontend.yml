@@ -38,6 +38,8 @@ jobs:
             echo "${{ secrets.DOCKERHUB_TOKEN }}" | sudo docker login -u "${{ vars.DOCKERHUB_USERNAME }}" --password-stdin
             sudo docker network create memo-network || true
 
+            # Stop, Kill, Pull, and Run the frontend contianer
+
             sudo docker stop daily-memo-frontend || true
             sudo docker rm daily-memo-frontend || true
             sudo docker pull asifdotcom/daily-memo:frontend

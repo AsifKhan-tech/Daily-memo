@@ -5,14 +5,14 @@ class Basedto {
 
   static validateInput(data) {
     //this.schema: refers the schema that pass in data variable
-    const { error, value } = this.schema.validate(data, {
+    const { errors, value } = this.schema.validate(data, {
       abortEarly: false,
       stripUnknown: true,
     });
 
-    if (error) {
-      console.log(error);
-      const errors = error.details.map((detail) => detail.message);
+    if (errors) {
+      console.log(errors);
+      const errors = errors.details.map((detail) => detail.message);
       return { errors, value: null };
     }
     return { errors: null, value };

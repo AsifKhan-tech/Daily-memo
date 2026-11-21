@@ -86,9 +86,7 @@ if (!mailConfigured) {
 //send email
 const sendEmail = async (to, subject, html) => {
   if (!mailConfigured) {
-    throw new Error(
-      "Mail is not configured. Set SMTP_USER and SMTP_FROM_EMAIL to your Gmail address in server/.env.",
-    );
+    throw new Error("Mail is not configured. Set SMTP_USER and SMTP_FROM_EMAIL to your Gmail address in server/.env.");
   }
 
   try {
@@ -115,7 +113,7 @@ const sendEmail = async (to, subject, html) => {
 //send verification email
 const sendVerificationEmail = async (email, token) => {
   try {
-    const url = `${process.env.CLIENT_URL}/verify-email/${token}`;
+    const url = `${process.env.APP_URL}/verify-email/${token}`;
 
     // 1. Determine the path to the HTML template
     const templatePath = path.join(__dirname, "templates", "verify-email.html");
@@ -150,7 +148,7 @@ const sendVerificationEmail = async (email, token) => {
 //send reset password email
 const sendResetPasswordEmail = async (email, token) => {
   try {
-    const url = `${process.env.CLIENT_URL}/reset-password/${token}`;
+    const url = `${process.env.APP_URL}/reset-password/${token}`;
 
     // Read the reset password template
     const templatePath = path.join(__dirname, "templates", "reset-password.html");
